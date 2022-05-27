@@ -12,7 +12,7 @@ using System.Net;
 using System.IO;
 using Weather_Info.OpenWeather;
 using Newtonsoft.Json;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 
 namespace Weather_Info
 {
@@ -37,60 +37,74 @@ namespace Weather_Info
             response.Close();
             return answer;
         }
+        public string Get_Weather_Api(string city, string api_Key)
+        {
+            WebRequest request = WebRequest.Create("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=metric&lang=en&appid=" + api_Key);
+            request.Method = "POST";
+            request.ContentType = "application/x-www-urlencoded";
+
+            WebResponse response = request.GetResponse();
+            string answer = string.Empty;
+            using (Stream s = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(s))
+                {
+                    answer = reader.ReadToEnd();
+                }
+            }
+            response.Close();
+            return answer;
+        }
         public void CreateCommand(string queryString, string connectionString)
         {
-            MySqlConnection connection = new MySqlConnection(connectionString);
+
+            SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
-            MySqlCommand command = new MySqlCommand(queryString, connection);
+            SqlCommand command = new SqlCommand(queryString, connection);
             command.ExecuteNonQuery();
             connection.Close();
-        }       
+        }
 
         public string Direction(double degrees, out string direct)
         {
             if (degrees > 0 && degrees < 90)
             {
-                direct =  "Северо-Восток";
+                direct = "North-East";
                 return direct;
             }
             else if (degrees > 90 && degrees < 180)
             {
-                direct = "Юго-Восток";
+                direct = "South-East";
                 return direct;
             }
             else if (degrees > 180 && degrees < 270)
             {
-                direct = "Юго-Запад";
+                direct = "South-West";
                 return direct;
             }
             else if (degrees > 270 && degrees < 360)
             {
-                direct = "Северо-Запад";
+                direct = "North-West";
                 return direct;
             }
-            else if (degrees == 0)
+            else if (degrees == 0 || degrees == 360)
             {
-                direct = "Север";
+                direct = "North";
                 return direct;
             }
             else if (degrees == 90)
             {
-                direct = "Восток";
+                direct = "East";
                 return direct;
             }
             else if (degrees == 180)
             {
-                direct = "Юг";
+                direct = "South";
                 return direct;
             }
             else if (degrees == 270)
             {
-                direct = "Запад";
-                return direct;
-            }
-            else if (degrees == 360)
-            {
-                direct = "Север";
+                direct = "West";
                 return direct;
             }
             direct = "";

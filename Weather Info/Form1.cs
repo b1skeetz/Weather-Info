@@ -12,7 +12,7 @@ using System.Net;
 using System.IO;
 using Weather_Info.OpenWeather;
 using Newtonsoft.Json;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 
 //нужна функция которая будет обновлять базу данных раз в 10 минут
 //нужна функция инсерта данных из апишки в базу и из базы в прогу
@@ -25,24 +25,19 @@ namespace Weather_Info
         string city;
         string api_Key = "e8aa863082b25a1895eca1d16b744370";
         List<string> keysValues = new List<string>();
-        Dictionary<string, string> languages = new Dictionary<string, string>()
+        /*Dictionary<string, string> languages = new Dictionary<string, string>()
         {
-            { "cz", "Чешский" },
-            { "de", "Немецкий" },
             { "en", "Английский" },
-            { "fr", "Французский" },
-            { "ru", "Русский" },
-            { "es", "Испанский" },
-            { "ua", "Украинский" }
-        };
+        };*/
         string direct;
         string direction;
         DateTime now = DateTime.Now;
-        string language;
+        //string language;
         string answer;
         string queryString;
-        string connectionString = "server=localhost;user=root;database=weather;password=IosifStalin2;";
-        
+        string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Database=master;" +
+                "Integrated Security=True;";
+
         public Form1()
         {
             InitializeComponent();
@@ -51,35 +46,42 @@ namespace Weather_Info
             comboBox_Cities.Items.Add("Berlin");
             comboBox_Cities.Items.Add("Nur-Sultan");
             comboBox_Cities.Items.Add("Kyiv");
-            string outLang;
+            /*string outLang;
 
-            foreach (var lang in languages.Keys)
+             foreach (var lang in languages.Keys)
+             {
+                 languages.TryGetValue(lang, out outLang);
+                 comboBox_language.Items.Add(outLang);
+             }*/
+            try
             {
-                languages.TryGetValue(lang, out outLang);
-                comboBox_language.Items.Add(outLang);
+                queryString = "CREATE TABLE [dbo].[Weather] (" +
+                                                           "[Id] BIGINT IDENTITY(1, 1) NOT NULL PRIMARY KEY," +
+                                                           "[City_Name] nvarchar(50) NOT NULL," +
+                                                           "[Main] nvarchar(50) NOT NULL," +
+                                                           "[Descript] nvarchar(50) NOT NULL," +
+                                                           "[Degrees] DECIMAL(18, 2) NOT NULL," +
+                                                           "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
+                                                           "[Direction] nvarchar(50) NOT NULL," +
+                                                           "[Humidity]  DECIMAL(18, 2) NOT NULL," +
+                                                           "[Pressure] int NOT NULL);";
+                functional.CreateCommand(queryString, connectionString);
+                InsertIntoDataBase();
             }
-            queryString = "CREATE TABLE weatherInfo(" +
-            "Id INT AUTO_INCREMENT PRIMARY KEY," +
-            "City_Name nvarchar(50) not null," +
-            "Main nvarchar(50) not null," +
-            "Descript nvarchar(50) not null," +
-            "Degrees double not null," +
-            "WindSpeed double not null," +
-            "Direction nvarchar(50) not null," +
-            "Humidity double not null," +
-            "Pressure int not null" +
-            "); ";
-            functional.CreateCommand(queryString, connectionString);
-            InsertIntoDataBase();           
+            catch (Exception ex)
+            {
+                return;
+            }
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            MySqlConnection connection = new MySqlConnection(connectionString);
-            MySqlCommand command = new MySqlCommand();
-            command.CommandText = "SELECT * FROM weather.weatherInfo;";
+            SqlConnection connection = new SqlConnection(connectionString);
+            SqlCommand command = new SqlCommand();
+            command.CommandText = "SELECT * FROM [dbo].[Weather];";
             command.Connection = connection;
-            MySqlDataReader reader;
+            SqlDataReader reader;
             try
             {
                 command.Connection.Open();
@@ -114,7 +116,7 @@ namespace Weather_Info
                 }
                 reader.Close();
             }
-            catch (MySqlException ex)
+            catch (SqlException ex)
             {
                 MessageBox.Show("Error: \r\n{0}", ex.ToString());
             }
@@ -126,32 +128,29 @@ namespace Weather_Info
 
         public void InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
         {
-            foreach (var lang in languages.Keys)
+            foreach (string cities in comboBox_Cities.Items)
             {
-                foreach (string cities in comboBox_Cities.Items)
-                {
-                    answer = functional.Get_Weather_Api(cities, api_Key, lang);
-                    OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
-                    direction = functional.Direction(openWeatherInfo.wind.deg, out direct);
-                    queryString = "INSERT weatherInfo (City_Name, Main, Descript, Degrees, WindSpeed, Direction, Humidity, Pressure) VALUES ('"
-                        + cities + "', '"
-                        + openWeatherInfo.weather[0].main + "', '"
-                        + openWeatherInfo.weather[0].description + "', "
-                        + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", "
-                        + ((int)openWeatherInfo.wind.speed).ToString() + ", '"
-                        + direction + "', "
-                        + openWeatherInfo.main.humidity.ToString() + ", "
-                        + ((int)openWeatherInfo.main.pressure).ToString() + ");";
-                    functional.CreateCommand(queryString, connectionString);
-                }
+                answer = functional.Get_Weather_Api(cities, api_Key);
+                OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
+                direction = functional.Direction(openWeatherInfo.wind.deg, out direct);
+                queryString = "INSERT INTO Weather (City_Name, Main, Descript, Degrees, WindSpeed, Direction, Humidity, Pressure) VALUES ('"
+                    + cities + "', '"
+                    + openWeatherInfo.weather[0].main + "', '"
+                    + openWeatherInfo.weather[0].description + "', "
+                    + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", " //нужно перевести в decimal
+                    + ((int)openWeatherInfo.wind.speed).ToString() + ", '"
+                    + direction + "', "
+                    + openWeatherInfo.main.humidity.ToString() + ", "
+                    + ((int)openWeatherInfo.main.pressure).ToString() + ");";
+                functional.CreateCommand(queryString, connectionString);
             }
-            
+
         }
 
         private void comboBox_Cities_SelectedIndexChanged(object sender, EventArgs e)
         {
             city = comboBox_Cities.SelectedItem.ToString();
-            if (comboBox_language.Text != "")
+            /*if (comboBox_language.Text != "")
             {
                 string outLang;
                 string key = "";
@@ -163,18 +162,18 @@ namespace Weather_Info
                     {
                         key = lang;
                     }
-                }
+                    }
+                }*/
 
-                answer = functional.Get_Weather_Api(city, api_Key, key);
-                Show_Content(answer);
-            }
+            answer = functional.Get_Weather_Api(city, api_Key);
+            Show_Content(answer);
+
 
         }
 
         private void comboBox_language_SelectedIndexChanged(object sender, EventArgs e)
         {
-            language = comboBox_language.SelectedItem.ToString();
-
+            /*language = comboBox_language.SelectedItem.ToString();
             string outLang;
             string key = "";
             string comboBoxValue = comboBox_language.SelectedItem.ToString();
@@ -185,11 +184,11 @@ namespace Weather_Info
                 {
                     key = lang;
                 }
-            }
+            }*/
 
             if (comboBox_Cities.Text != "")
             {
-                answer = functional.Get_Weather_Api(city, api_Key, key);
+                answer = functional.Get_Weather_Api(city, api_Key);
                 Show_Content(answer);
 
             }
@@ -215,25 +214,21 @@ namespace Weather_Info
         {
             if (comboBox_Cities.Text != "")
             {
-                if (comboBox_language.Text != "")
+
+                /*string outLang;
+                string key = "";
+                string comboBoxValue = comboBox_language.SelectedItem.ToString();
+                foreach (var lang in languages.Keys)
                 {
-                    string outLang;
-                    string key = "";
-                    string comboBoxValue = comboBox_language.SelectedItem.ToString();
-                    foreach (var lang in languages.Keys)
+                    languages.TryGetValue(lang, out outLang);
+                    if (outLang == comboBoxValue)
                     {
-                        languages.TryGetValue(lang, out outLang);
-                        if (outLang == comboBoxValue)
-                        {
-                            key = lang;
-                        }
+                        key = lang;
                     }
+                }*/
 
-                    string update = functional.Get_Weather_Api(city, api_Key, key);
-                    Show_Content(update);
-
-                }
-
+                string update = functional.Get_Weather_Api(city, api_Key);
+                Show_Content(update);
             }
         }
 
@@ -248,28 +243,27 @@ namespace Weather_Info
 
         private void очиститьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            queryString = "DROP TABLE IF EXISTS weatherInfo;";
+            queryString = "DROP TABLE [dbo].[Weather];";
             functional.CreateCommand(queryString, connectionString);
         }
 
         private void создатьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            queryString = "CREATE TABLE weatherInfo(" +
-            "Id INT AUTO_INCREMENT PRIMARY KEY," +
-            "City_Name nvarchar(50) not null," +
-            "Main nvarchar(50) not null," +
-            "Descript nvarchar(50) not null," +
-            "Degrees double not null," +
-            "WindSpeed double not null," +
-            "Direction nvarchar(50) not null," +
-            "Humidity double not null," +
-            "Pressure int not null" +
-            "); ";
+            queryString = "CREATE TABLE [dbo].[Weather] (" +
+                                                          "[Id] BIGINT IDENTITY(1, 1) NOT NULL PRIMARY KEY," +
+                                                          "[City_Name] nvarchar(50) NOT NULL," +
+                                                          "[Main] nvarchar(50) NOT NULL," +
+                                                          "[Descript] nvarchar(50) NOT NULL," +
+                                                          "[Degrees] DECIMAL(18, 2) NOT NULL," +
+                                                          "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
+                                                          "[Direction] nvarchar(50) NOT NULL," +
+                                                          "[Humidity]  DECIMAL(18, 2) NOT NULL," +
+                                                          "[Pressure] int NOT NULL);";
             functional.CreateCommand(queryString, connectionString);
             InsertIntoDataBase();
         }
@@ -282,7 +276,7 @@ namespace Weather_Info
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            queryString = "DROP TABLE IF EXISTS weatherInfo;";
+            queryString = "DROP TABLE [dbo].[Weather];";
             functional.CreateCommand(queryString, connectionString);
         }
 

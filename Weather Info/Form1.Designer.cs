@@ -35,7 +35,6 @@ namespace Weather_Info
             this.groupBox_wind = new System.Windows.Forms.GroupBox();
             this.label_Direction = new System.Windows.Forms.Label();
             this.label_WindSpeed = new System.Windows.Forms.Label();
-            this.comboBox_language = new System.Windows.Forms.ComboBox();
             this.label_Name = new System.Windows.Forms.Label();
             this.comboBox_Cities = new System.Windows.Forms.ComboBox();
             this.label_Pressure = new System.Windows.Forms.Label();
@@ -66,7 +65,6 @@ namespace Weather_Info
             this.groupBox_weather.Controls.Add(this.label_SelectCity);
             this.groupBox_weather.Controls.Add(this.button_weatherUpdate);
             this.groupBox_weather.Controls.Add(this.groupBox_wind);
-            this.groupBox_weather.Controls.Add(this.comboBox_language);
             this.groupBox_weather.Controls.Add(this.label_Name);
             this.groupBox_weather.Controls.Add(this.comboBox_Cities);
             this.groupBox_weather.Controls.Add(this.label_Pressure);
@@ -106,7 +104,7 @@ namespace Weather_Info
             // 
             this.groupBox_wind.Controls.Add(this.label_Direction);
             this.groupBox_wind.Controls.Add(this.label_WindSpeed);
-            this.groupBox_wind.Location = new System.Drawing.Point(18, 351);
+            this.groupBox_wind.Location = new System.Drawing.Point(18, 337);
             this.groupBox_wind.Name = "groupBox_wind";
             this.groupBox_wind.Size = new System.Drawing.Size(397, 110);
             this.groupBox_wind.TabIndex = 5;
@@ -130,16 +128,6 @@ namespace Weather_Info
             this.label_WindSpeed.Size = new System.Drawing.Size(150, 22);
             this.label_WindSpeed.TabIndex = 0;
             this.label_WindSpeed.Text = "Скорость ветра";
-            // 
-            // comboBox_language
-            // 
-            this.comboBox_language.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_language.FormattingEnabled = true;
-            this.comboBox_language.Location = new System.Drawing.Point(18, 306);
-            this.comboBox_language.Name = "comboBox_language";
-            this.comboBox_language.Size = new System.Drawing.Size(230, 30);
-            this.comboBox_language.TabIndex = 3;
-            this.comboBox_language.SelectedIndexChanged += new System.EventHandler(this.comboBox_language_SelectedIndexChanged);
             // 
             // label_Name
             // 
@@ -344,7 +332,6 @@ namespace Weather_Info
         private System.Windows.Forms.Panel panel_ImageStatus;
         private System.Windows.Forms.ComboBox comboBox_Cities;
         private System.Windows.Forms.Label label_Name;
-        private System.Windows.Forms.ComboBox comboBox_language;
         private System.Windows.Forms.Button button_weatherUpdate;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem параметрыToolStripMenuItem;
