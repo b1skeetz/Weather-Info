@@ -37,6 +37,7 @@ namespace Weather_Info
         string queryString;
         string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Database=master;" +
                 "Integrated Security=True;";
+        bool debug;
 
         public Form1()
         {
@@ -66,7 +67,7 @@ namespace Weather_Info
                                                            "[Humidity]  DECIMAL(18, 2) NOT NULL," +
                                                            "[Pressure] int NOT NULL);";
                 functional.CreateCommand(queryString, connectionString);
-                InsertIntoDataBase();
+                debug = InsertIntoDataBase();
             }
             catch (Exception ex)
             {
@@ -126,7 +127,7 @@ namespace Weather_Info
             }
         }
 
-        public void InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
+        public bool InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
         {
             foreach (string cities in comboBox_Cities.Items)
             {
@@ -139,12 +140,13 @@ namespace Weather_Info
                     + openWeatherInfo.weather[0].description + "', "
                     + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", " //нужно перевести в decimal
                     + ((int)openWeatherInfo.wind.speed).ToString() + ", '"
-                    + direction + "', "
+                    + direct + "', "
                     + openWeatherInfo.main.humidity.ToString() + ", "
                     + ((int)openWeatherInfo.main.pressure).ToString() + ");";
                 functional.CreateCommand(queryString, connectionString);
+                return true;
             }
-
+            return false;
         }
 
         private void comboBox_Cities_SelectedIndexChanged(object sender, EventArgs e)
