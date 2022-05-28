@@ -37,7 +37,6 @@ namespace Weather_Info
         string queryString;
         string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Database=master;" +
                 "Integrated Security=True;";
-        bool debug;
 
         public Form1()
         {
@@ -65,9 +64,10 @@ namespace Weather_Info
                                                            "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
                                                            "[Direction] nvarchar(50) NOT NULL," +
                                                            "[Humidity]  DECIMAL(18, 2) NOT NULL," +
-                                                           "[Pressure] int NOT NULL);";
+                                                           "[Pressure] int NOT NULL," +
+                                                           "[Icon] nvarchar(50) NOT NULL);";
                 functional.CreateCommand(queryString, connectionString);
-                debug = InsertIntoDataBase();
+                InsertIntoDataBase();
             }
             catch (Exception ex)
             {
@@ -127,14 +127,15 @@ namespace Weather_Info
             }
         }
 
-        public bool InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
+        public void InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
         {
             foreach (string cities in comboBox_Cities.Items)
             {
                 answer = functional.Get_Weather_Api(cities, api_Key);
                 OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
                 direction = functional.Direction(openWeatherInfo.wind.deg, out direct);
-                queryString = "INSERT INTO Weather (City_Name, Main, Descript, Degrees, WindSpeed, Direction, Humidity, Pressure) VALUES ('"
+
+                queryString = "INSERT INTO Weather (City_Name, Main, Descript, Degrees, WindSpeed, Direction, Humidity, Pressure, Icon) VALUES ('"
                     + cities + "', '"
                     + openWeatherInfo.weather[0].main + "', '"
                     + openWeatherInfo.weather[0].description + "', "
@@ -142,12 +143,33 @@ namespace Weather_Info
                     + ((int)openWeatherInfo.wind.speed).ToString() + ", '"
                     + direct + "', "
                     + openWeatherInfo.main.humidity.ToString() + ", "
-                    + ((int)openWeatherInfo.main.pressure).ToString() + ");";
-                functional.CreateCommand(queryString, connectionString);
-                return true;
+                    + ((int)openWeatherInfo.main.pressure).ToString() + ", '"
+                    + openWeatherInfo.weather[0].icon + "');";
+                functional.CreateCommand(queryString, connectionString);      
             }
-            return false;
         }
+        public void UpdateDataBase() // производит INSERT запрос в базу данных из API 
+        {
+            foreach (string cities in comboBox_Cities.Items)
+            {
+                answer = functional.Get_Weather_Api(cities, api_Key);
+                OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
+                direction = functional.Direction(openWeatherInfo.wind.deg, out direct);
+                queryString = "UPDATE[dbo].[Weather] SET " +
+                    "City_Name = '" + cities + "', " +
+                    "Main = '" + openWeatherInfo.weather[0].main + "', " +
+                    "Descript = '" + openWeatherInfo.weather[0].description + "', " +
+                    "Degrees = " + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", " +
+                    "WindSpeed = " + ((int)openWeatherInfo.wind.speed).ToString() + ", " +
+                    "Direction = '" + direct + "', " +
+                    "Humidity = " + openWeatherInfo.main.humidity.ToString() + ", " +
+                    "Pressure = " + ((int)openWeatherInfo.main.pressure).ToString() + ", " + 
+                    "Icon = " + openWeatherInfo.weather[0].icon + 
+                    "WHERE City_Name = ' " + cities + " ';'";
+                functional.CreateCommand(queryString, connectionString);
+            }
+        }
+        
 
         private void comboBox_Cities_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -167,10 +189,43 @@ namespace Weather_Info
                     }
                 }*/
 
-            answer = functional.Get_Weather_Api(city, api_Key);
-            Show_Content(answer);
-
-
+            /*answer = functional.Get_Weather_Api(city, api_Key);
+            Show_Content(answer);*/
+            string path = "C:/Users/КадыржановД/Documents/GitHub/Weather-Info/Weather Info/icons/";
+            string iconName = "";
+            SqlConnection connection = new SqlConnection(connectionString);
+            SqlCommand command = new SqlCommand();
+            command.CommandText = "SELECT * FROM [dbo].[Weather] WHERE [City_Name] = '" + city + "';";
+            command.Connection = connection;
+            SqlDataReader reader;
+            try
+            {
+                command.Connection.Open();
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    
+                    label_Name.Text = reader["City_Name"].ToString();
+                    label_main.Text = reader["Main"].ToString();
+                    label_Description.Text = reader["Descript"].ToString();
+                    label_Degrees.Text = "Средняя температура (°С): " + reader["Degrees"].ToString();
+                    label_WindSpeed.Text = "Скорость (м/с): " + reader["WindSpeed"].ToString();
+                    label_Direction.Text = "Направление: " + reader["Direction"].ToString();
+                    label_Humidity.Text = "Влажность: (%): " + reader["Humidity"].ToString();
+                    label_Pressure.Text = "Давление (мм): " + reader["Pressure"].ToString();
+                    iconName = reader["Icon"].ToString(); 
+                    panel_ImageStatus.BackgroundImage = new Bitmap(Image.FromFile($"{path}{iconName}.png"));
+                }
+                reader.Close();
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Error: \r\n{0}", ex.ToString());
+            }
+            finally
+            {
+                command.Connection.Close();
+            }
         }
 
         private void comboBox_language_SelectedIndexChanged(object sender, EventArgs e)
@@ -191,25 +246,9 @@ namespace Weather_Info
             if (comboBox_Cities.Text != "")
             {
                 answer = functional.Get_Weather_Api(city, api_Key);
-                Show_Content(answer);
+                //Show_Content(answer);
 
             }
-        }
-
-        public void Show_Content(string answer)
-        {
-            OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
-
-            panel_ImageStatus.BackgroundImage = openWeatherInfo.weather[0].Icon;
-
-            label_Name.Text = openWeatherInfo.name;
-            label_main.Text = openWeatherInfo.weather[0].main;
-            label_Description.Text = openWeatherInfo.weather[0].description;
-            label_Degrees.Text = "Средняя температура (°С): " + openWeatherInfo.main.temp.ToString("0.##");
-            label_WindSpeed.Text = "Скорость (м/с): " + openWeatherInfo.wind.speed.ToString();
-            label_Direction.Text = "Направление: " + functional.Direction(openWeatherInfo.wind.deg, out direct);
-            label_Humidity.Text = "Влажность: (%): " + openWeatherInfo.main.humidity.ToString();
-            label_Pressure.Text = "Давление (мм): " + ((int)openWeatherInfo.main.pressure).ToString();
         }
 
         private void button_weatherUpdate_Click(object sender, EventArgs e)
@@ -229,8 +268,9 @@ namespace Weather_Info
                     }
                 }*/
 
-                string update = functional.Get_Weather_Api(city, api_Key);
-                Show_Content(update);
+                answer = functional.Get_Weather_Api(city, api_Key);
+                InsertIntoDataBase();
+                //Show_Content(answer);
             }
         }
 
@@ -257,15 +297,16 @@ namespace Weather_Info
         private void создатьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             queryString = "CREATE TABLE [dbo].[Weather] (" +
-                                                          "[Id] BIGINT IDENTITY(1, 1) NOT NULL PRIMARY KEY," +
-                                                          "[City_Name] nvarchar(50) NOT NULL," +
-                                                          "[Main] nvarchar(50) NOT NULL," +
-                                                          "[Descript] nvarchar(50) NOT NULL," +
-                                                          "[Degrees] DECIMAL(18, 2) NOT NULL," +
-                                                          "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
-                                                          "[Direction] nvarchar(50) NOT NULL," +
-                                                          "[Humidity]  DECIMAL(18, 2) NOT NULL," +
-                                                          "[Pressure] int NOT NULL);";
+                                                           "[Id] BIGINT IDENTITY(1, 1) NOT NULL PRIMARY KEY," +
+                                                           "[City_Name] nvarchar(50) NOT NULL," +
+                                                           "[Main] nvarchar(50) NOT NULL," +
+                                                           "[Descript] nvarchar(50) NOT NULL," +
+                                                           "[Degrees] DECIMAL(18, 2) NOT NULL," +
+                                                           "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
+                                                           "[Direction] nvarchar(50) NOT NULL," +
+                                                           "[Humidity]  DECIMAL(18, 2) NOT NULL," +
+                                                           "[Pressure] int NOT NULL," +
+                                                           "[Icon] nvarchar(50) NOT NULL);";
             functional.CreateCommand(queryString, connectionString);
             InsertIntoDataBase();
         }
