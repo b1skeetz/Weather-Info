@@ -164,8 +164,8 @@ namespace Weather_Info
                     "Direction = '" + direct + "', " +
                     "Humidity = " + openWeatherInfo.main.humidity.ToString() + ", " +
                     "Pressure = " + ((int)openWeatherInfo.main.pressure).ToString() + ", " + 
-                    "Icon = " + openWeatherInfo.weather[0].icon + 
-                    "WHERE City_Name = ' " + cities + " ';'";
+                    "Icon = '" + openWeatherInfo.weather[0].icon + "' " +
+                    "WHERE City_Name = ' " + cities + " ';";
                 functional.CreateCommand(queryString, connectionString);
             }
         }
@@ -268,9 +268,10 @@ namespace Weather_Info
                     }
                 }*/
 
-                answer = functional.Get_Weather_Api(city, api_Key);
-                InsertIntoDataBase();
+                /*answer = functional.Get_Weather_Api(city, api_Key);
+                InsertIntoDataBase();*/
                 //Show_Content(answer);
+                UpdateDataBase();
             }
         }
 

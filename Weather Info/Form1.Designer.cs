@@ -135,9 +135,9 @@ namespace Weather_Info
             this.label_Name.Font = new System.Drawing.Font("Consolas", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label_Name.Location = new System.Drawing.Point(18, 32);
             this.label_Name.Name = "label_Name";
-            this.label_Name.Size = new System.Drawing.Size(89, 37);
+            this.label_Name.Size = new System.Drawing.Size(107, 37);
             this.label_Name.TabIndex = 2;
-            this.label_Name.Text = "City";
+            this.label_Name.Text = "Город";
             // 
             // comboBox_Cities
             // 
