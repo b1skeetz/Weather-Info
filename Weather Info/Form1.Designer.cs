@@ -32,6 +32,7 @@ namespace Weather_Info
             this.components = new System.ComponentModel.Container();
             this.groupBox_weather = new System.Windows.Forms.GroupBox();
             this.listBox_Cities = new System.Windows.Forms.ListBox();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.label_SelectCity = new System.Windows.Forms.Label();
             this.button_weatherUpdate = new System.Windows.Forms.Button();
             this.groupBox_wind = new System.Windows.Forms.GroupBox();
@@ -45,10 +46,11 @@ namespace Weather_Info
             this.label_Degrees = new System.Windows.Forms.Label();
             this.label_Description = new System.Windows.Forms.Label();
             this.label_main = new System.Windows.Forms.Label();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.параметрыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changeThemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.darkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.базаДанныхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.таблицаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.создатьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,14 +59,14 @@ namespace Weather_Info
             this.открытьAPIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer_update = new System.Windows.Forms.Timer(this.components);
             this.groupBox_weather.SuspendLayout();
-            this.groupBox_wind.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.groupBox_wind.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox_weather
             // 
-            this.groupBox_weather.BackColor = System.Drawing.Color.SeaShell;
+            this.groupBox_weather.BackColor = System.Drawing.Color.DarkGray;
             this.groupBox_weather.Controls.Add(this.listBox_Cities);
             this.groupBox_weather.Controls.Add(this.dataGridView1);
             this.groupBox_weather.Controls.Add(this.label_SelectCity);
@@ -86,7 +88,7 @@ namespace Weather_Info
             // 
             // listBox_Cities
             // 
-            this.listBox_Cities.BackColor = System.Drawing.Color.GhostWhite;
+            this.listBox_Cities.BackColor = System.Drawing.Color.MediumPurple;
             this.listBox_Cities.FormattingEnabled = true;
             this.listBox_Cities.ItemHeight = 22;
             this.listBox_Cities.Items.AddRange(new object[] {
@@ -182,6 +184,16 @@ namespace Weather_Info
             this.listBox_Cities.TabIndex = 7;
             this.listBox_Cities.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(651, 452);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowTemplate.Height = 25;
+            this.dataGridView1.Size = new System.Drawing.Size(24, 24);
+            this.dataGridView1.TabIndex = 6;
+            this.dataGridView1.Visible = false;
+            // 
             // label_SelectCity
             // 
             this.label_SelectCity.AutoSize = true;
@@ -276,17 +288,17 @@ namespace Weather_Info
             // 
             // panel_ImageStatus
             // 
-            this.panel_ImageStatus.BackColor = System.Drawing.Color.Bisque;
+            this.panel_ImageStatus.BackColor = System.Drawing.Color.DimGray;
             this.panel_ImageStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.panel_ImageStatus.Location = new System.Drawing.Point(176, 101);
+            this.panel_ImageStatus.Location = new System.Drawing.Point(176, 99);
             this.panel_ImageStatus.Name = "panel_ImageStatus";
-            this.panel_ImageStatus.Size = new System.Drawing.Size(110, 110);
+            this.panel_ImageStatus.Size = new System.Drawing.Size(110, 112);
             this.panel_ImageStatus.TabIndex = 0;
             // 
             // label_Degrees
             // 
             this.label_Degrees.AutoSize = true;
-            this.label_Degrees.BackColor = System.Drawing.Color.Bisque;
+            this.label_Degrees.BackColor = System.Drawing.Color.DimGray;
             this.label_Degrees.Font = new System.Drawing.Font("Consolas", 72F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label_Degrees.Location = new System.Drawing.Point(304, 99);
             this.label_Degrees.Name = "label_Degrees";
@@ -312,18 +324,10 @@ namespace Weather_Info
             this.label_main.TabIndex = 0;
             this.label_main.Text = "Main";
             // 
-            // dataGridView1
-            // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(651, 452);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(24, 24);
-            this.dataGridView1.TabIndex = 6;
-            this.dataGridView1.Visible = false;
-            // 
             // menuStrip1
             // 
+            this.menuStrip1.BackColor = System.Drawing.Color.DimGray;
+            this.menuStrip1.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.параметрыToolStripMenuItem,
             this.базаДанныхToolStripMenuItem,
@@ -339,21 +343,39 @@ namespace Weather_Info
             this.параметрыToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changeThemeToolStripMenuItem});
             this.параметрыToolStripMenuItem.Name = "параметрыToolStripMenuItem";
-            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.параметрыToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.параметрыToolStripMenuItem.Text = "Settings";
             // 
             // changeThemeToolStripMenuItem
             // 
+            this.changeThemeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.darkToolStripMenuItem,
+            this.lightToolStripMenuItem});
             this.changeThemeToolStripMenuItem.Name = "changeThemeToolStripMenuItem";
-            this.changeThemeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.changeThemeToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.changeThemeToolStripMenuItem.Text = "Change theme";
+            this.changeThemeToolStripMenuItem.Click += new System.EventHandler(this.changeThemeToolStripMenuItem_Click);
+            // 
+            // darkToolStripMenuItem
+            // 
+            this.darkToolStripMenuItem.Name = "darkToolStripMenuItem";
+            this.darkToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.darkToolStripMenuItem.Text = "Dark";
+            this.darkToolStripMenuItem.Click += new System.EventHandler(this.darkToolStripMenuItem_Click);
+            // 
+            // lightToolStripMenuItem
+            // 
+            this.lightToolStripMenuItem.Name = "lightToolStripMenuItem";
+            this.lightToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.lightToolStripMenuItem.Text = "Light";
+            this.lightToolStripMenuItem.Click += new System.EventHandler(this.lightToolStripMenuItem_Click);
             // 
             // базаДанныхToolStripMenuItem
             // 
             this.базаДанныхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.таблицаToolStripMenuItem});
             this.базаДанныхToolStripMenuItem.Name = "базаДанныхToolStripMenuItem";
-            this.базаДанныхToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.базаДанныхToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.базаДанныхToolStripMenuItem.Text = "Database";
             // 
             // таблицаToolStripMenuItem
@@ -362,7 +384,7 @@ namespace Weather_Info
             this.создатьToolStripMenuItem,
             this.удалитьToolStripMenuItem});
             this.таблицаToolStripMenuItem.Name = "таблицаToolStripMenuItem";
-            this.таблицаToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.таблицаToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.таблицаToolStripMenuItem.Text = "Weather Table";
             // 
             // создатьToolStripMenuItem
@@ -384,13 +406,13 @@ namespace Weather_Info
             this.aPIToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.открытьAPIToolStripMenuItem});
             this.aPIToolStripMenuItem.Name = "aPIToolStripMenuItem";
-            this.aPIToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.aPIToolStripMenuItem.Size = new System.Drawing.Size(38, 20);
             this.aPIToolStripMenuItem.Text = "API";
             // 
             // открытьAPIToolStripMenuItem
             // 
             this.открытьAPIToolStripMenuItem.Name = "открытьAPIToolStripMenuItem";
-            this.открытьAPIToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.открытьAPIToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.открытьAPIToolStripMenuItem.Text = "Open API";
             this.открытьAPIToolStripMenuItem.Click += new System.EventHandler(this.открытьAPIToolStripMenuItem_Click);
             // 
@@ -403,6 +425,7 @@ namespace Weather_Info
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(836, 515);
             this.Controls.Add(this.groupBox_weather);
             this.Controls.Add(this.menuStrip1);
@@ -415,9 +438,9 @@ namespace Weather_Info
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox_weather.ResumeLayout(false);
             this.groupBox_weather.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.groupBox_wind.ResumeLayout(false);
             this.groupBox_wind.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -452,6 +475,8 @@ namespace Weather_Info
         private System.Windows.Forms.ToolStripMenuItem changeThemeToolStripMenuItem;
         private System.Windows.Forms.ListBox listBox_Cities;
         private System.Windows.Forms.Timer timer_update;
+        private System.Windows.Forms.ToolStripMenuItem darkToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lightToolStripMenuItem;
     }
 }
 

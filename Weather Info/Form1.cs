@@ -327,5 +327,33 @@ namespace Weather_Info
                 functional.SelectDataBase(connectionString, dataGridView1);
             }
         }
+
+        private void changeThemeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+
+        }
+
+        private void darkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            menuStrip1.BackColor = Color.DimGray;
+            groupBox_weather.BackColor = Color.DarkGray;
+            panel_ImageStatus.BackColor = Color.DimGray;
+            label_Degrees.BackColor = Color.DimGray;
+            listBox_Cities.BackColor = Color.MediumPurple;
+            groupBox_wind.BackColor = Color.DarkGray;
+            this.BackColor = Color.DimGray;
+        }
+
+        private void lightToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            menuStrip1.BackColor = Color.WhiteSmoke;
+            groupBox_weather.BackColor = Color.SeaShell;
+            panel_ImageStatus.BackColor = Color.Bisque;
+            label_Degrees.BackColor = Color.Bisque;
+            listBox_Cities.BackColor = Color.GhostWhite;
+            groupBox_wind.BackColor = Color.SeaShell;
+            this.BackColor = Color.WhiteSmoke;
+        }
     }
 }
