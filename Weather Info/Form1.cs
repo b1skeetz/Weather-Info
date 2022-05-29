@@ -24,19 +24,14 @@ namespace Weather_Info
         Functional functional = new Functional();
         string city;
         string api_Key = "e8aa863082b25a1895eca1d16b744370";
-        List<string> keysValues = new List<string>();
-        /*Dictionary<string, string> languages = new Dictionary<string, string>()
-        {
-            { "en", "Английский" },
-        };*/
         string direct;
         string direction;
         DateTime now = DateTime.Now;
-        //string language;
         string answer;
         string queryString;
         string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Database=master;" +
                 "Integrated Security=True;";
+        bool isExist = true;
 
         public Form1()
         {
@@ -46,13 +41,7 @@ namespace Weather_Info
             comboBox_Cities.Items.Add("Berlin");
             comboBox_Cities.Items.Add("Nur-Sultan");
             comboBox_Cities.Items.Add("Kyiv");
-            /*string outLang;
-
-             foreach (var lang in languages.Keys)
-             {
-                 languages.TryGetValue(lang, out outLang);
-                 comboBox_language.Items.Add(outLang);
-             }*/
+            
             try
             {
                 queryString = "CREATE TABLE [dbo].[Weather] (" +
@@ -60,76 +49,59 @@ namespace Weather_Info
                                                            "[City_Name] nvarchar(50) NOT NULL," +
                                                            "[Main] nvarchar(50) NOT NULL," +
                                                            "[Descript] nvarchar(50) NOT NULL," +
-                                                           "[Degrees] DECIMAL(18, 2) NOT NULL," +
-                                                           "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
+                                                           "[Degrees] INT NOT NULL," +
+                                                           "[WindSpeed] INT NOT NULL," +
                                                            "[Direction] nvarchar(50) NOT NULL," +
-                                                           "[Humidity]  DECIMAL(18, 2) NOT NULL," +
+                                                           "[Humidity] INT NOT NULL," +
                                                            "[Pressure] int NOT NULL," +
                                                            "[Icon] nvarchar(50) NOT NULL);";
                 functional.CreateCommand(queryString, connectionString);
                 InsertIntoDataBase();
+                isExist = true;
             }
             catch (Exception ex)
             {
                 return;
             }
+            listBox_Cities.SelectedIndex = 0;
 
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
-            SqlCommand command = new SqlCommand();
-            command.CommandText = "SELECT * FROM [dbo].[Weather];";
-            command.Connection = connection;
-            SqlDataReader reader;
-            try
-            {
-                command.Connection.Open();
-                reader = command.ExecuteReader();
-                this.dataGridView1.Columns.Add("City_Name", "Город");
-                this.dataGridView1.Columns["City_Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("City_Name", "Город");
+            this.dataGridView1.Columns["City_Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Main", "Основное");
-                this.dataGridView1.Columns["Main"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("Main", "Основное");
+            this.dataGridView1.Columns["Main"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Descript", "Описание");
-                this.dataGridView1.Columns["Descript"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("Descript", "Описание");
+            this.dataGridView1.Columns["Descript"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Degrees", "Температура");
-                this.dataGridView1.Columns["Main"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("Degrees", "Температура");
+            this.dataGridView1.Columns["Main"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("WindSpeed", "Скорость ветра");
-                this.dataGridView1.Columns["WindSpeed"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("WindSpeed", "Скорость ветра");
+            this.dataGridView1.Columns["WindSpeed"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Direction", "Направление ветра");
-                this.dataGridView1.Columns["Direction"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("Direction", "Направление ветра");
+            this.dataGridView1.Columns["Direction"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Humidity", "Влажность");
-                this.dataGridView1.Columns["Humidity"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridView1.Columns.Add("Humidity", "Влажность");
+            this.dataGridView1.Columns["Humidity"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-                this.dataGridView1.Columns.Add("Pressure", "Давление");
-                this.dataGridView1.Columns["Pressure"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                while (reader.Read())
-                {
-                    dataGridView1.Rows.Add(reader["City_Name"].ToString(), reader["Main"].ToString(), reader["Descript"].ToString(), reader["Degrees"].ToString(),
-                        reader["WindSpeed"].ToString(), reader["Direction"].ToString(), reader["Humidity"].ToString(), reader["Pressure"].ToString());
-                }
-                reader.Close();
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show("Error: \r\n{0}", ex.ToString());
-            }
-            finally
-            {
-                command.Connection.Close();
-            }
+            this.dataGridView1.Columns.Add("Pressure", "Давление");
+            this.dataGridView1.Columns["Pressure"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            functional.SelectDataBase(connectionString, dataGridView1);
+
+            timer_update.Interval = (10 * 60 * 1000); // 10 mins
+            timer_update.Start();
+
         }
 
         public void InsertIntoDataBase() // производит INSERT запрос в базу данных из API 
         {
-            foreach (string cities in comboBox_Cities.Items)
+            foreach (string cities in listBox_Cities.Items)
             {
                 answer = functional.Get_Weather_Api(cities, api_Key);
                 OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
@@ -139,18 +111,18 @@ namespace Weather_Info
                     + cities + "', '"
                     + openWeatherInfo.weather[0].main + "', '"
                     + openWeatherInfo.weather[0].description + "', "
-                    + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", " //нужно перевести в decimal
+                    + ((int)openWeatherInfo.main.temp).ToString() + ", "
                     + ((int)openWeatherInfo.wind.speed).ToString() + ", '"
                     + direct + "', "
                     + openWeatherInfo.main.humidity.ToString() + ", "
                     + ((int)openWeatherInfo.main.pressure).ToString() + ", '"
                     + openWeatherInfo.weather[0].icon + "');";
-                functional.CreateCommand(queryString, connectionString);      
+                functional.CreateCommand(queryString, connectionString);
             }
         }
         public void UpdateDataBase() // производит INSERT запрос в базу данных из API 
         {
-            foreach (string cities in comboBox_Cities.Items)
+            foreach (string cities in listBox_Cities.Items)
             {
                 answer = functional.Get_Weather_Api(cities, api_Key);
                 OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
@@ -163,35 +135,19 @@ namespace Weather_Info
                     "WindSpeed = " + ((int)openWeatherInfo.wind.speed).ToString() + ", " +
                     "Direction = '" + direct + "', " +
                     "Humidity = " + openWeatherInfo.main.humidity.ToString() + ", " +
-                    "Pressure = " + ((int)openWeatherInfo.main.pressure).ToString() + ", " + 
+                    "Pressure = " + ((int)openWeatherInfo.main.pressure).ToString() + ", " +
                     "Icon = '" + openWeatherInfo.weather[0].icon + "' " +
                     "WHERE City_Name = ' " + cities + " ';";
                 functional.CreateCommand(queryString, connectionString);
+                functional.SelectDataBase(connectionString, dataGridView1);
             }
         }
-        
+
 
         private void comboBox_Cities_SelectedIndexChanged(object sender, EventArgs e)
         {
             city = comboBox_Cities.SelectedItem.ToString();
-            /*if (comboBox_language.Text != "")
-            {
-                string outLang;
-                string key = "";
-                string comboBoxValue = comboBox_language.SelectedItem.ToString();
-                foreach (var lang in languages.Keys)
-                {
-                    languages.TryGetValue(lang, out outLang);
-                    if (outLang == comboBoxValue)
-                    {
-                        key = lang;
-                    }
-                    }
-                }*/
-
-            /*answer = functional.Get_Weather_Api(city, api_Key);
-            Show_Content(answer);*/
-            string path = "C:/Users/КадыржановД/Documents/GitHub/Weather-Info/Weather Info/icons/";
+            string path = Directory.GetCurrentDirectory() + "/icons/";
             string iconName = "";
             SqlConnection connection = new SqlConnection(connectionString);
             SqlCommand command = new SqlCommand();
@@ -204,16 +160,16 @@ namespace Weather_Info
                 reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    
-                    label_Name.Text = reader["City_Name"].ToString();
-                    label_main.Text = reader["Main"].ToString();
-                    label_Description.Text = reader["Descript"].ToString();
-                    label_Degrees.Text = "Средняя температура (°С): " + reader["Degrees"].ToString();
-                    label_WindSpeed.Text = "Скорость (м/с): " + reader["WindSpeed"].ToString();
-                    label_Direction.Text = "Направление: " + reader["Direction"].ToString();
-                    label_Humidity.Text = "Влажность: (%): " + reader["Humidity"].ToString();
-                    label_Pressure.Text = "Давление (мм): " + reader["Pressure"].ToString();
-                    iconName = reader["Icon"].ToString(); 
+
+                    label_Name.Text = reader["City_Name"].ToString().ToUpper();
+                    label_main.Text = reader["Main"].ToString().ToUpper();
+                    label_Description.Text = reader["Descript"].ToString().ToUpper();
+                    label_Degrees.Text = reader["Degrees"].ToString() + "°С";
+                    label_WindSpeed.Text = "Wind speed (m/s): " + reader["WindSpeed"].ToString();
+                    label_Direction.Text = "Wind direction: " + reader["Direction"].ToString();
+                    label_Humidity.Text = "Humidity (%): " + reader["Humidity"].ToString();
+                    label_Pressure.Text = "Pressure (mm): " + reader["Pressure"].ToString();
+                    iconName = reader["Icon"].ToString();
                     panel_ImageStatus.BackgroundImage = new Bitmap(Image.FromFile($"{path}{iconName}.png"));
                 }
                 reader.Close();
@@ -230,24 +186,9 @@ namespace Weather_Info
 
         private void comboBox_language_SelectedIndexChanged(object sender, EventArgs e)
         {
-            /*language = comboBox_language.SelectedItem.ToString();
-            string outLang;
-            string key = "";
-            string comboBoxValue = comboBox_language.SelectedItem.ToString();
-            foreach (var lang in languages.Keys)
-            {
-                languages.TryGetValue(lang, out outLang);
-                if (outLang == comboBoxValue)
-                {
-                    key = lang;
-                }
-            }*/
-
             if (comboBox_Cities.Text != "")
             {
                 answer = functional.Get_Weather_Api(city, api_Key);
-                //Show_Content(answer);
-
             }
         }
 
@@ -255,22 +196,6 @@ namespace Weather_Info
         {
             if (comboBox_Cities.Text != "")
             {
-
-                /*string outLang;
-                string key = "";
-                string comboBoxValue = comboBox_language.SelectedItem.ToString();
-                foreach (var lang in languages.Keys)
-                {
-                    languages.TryGetValue(lang, out outLang);
-                    if (outLang == comboBoxValue)
-                    {
-                        key = lang;
-                    }
-                }*/
-
-                /*answer = functional.Get_Weather_Api(city, api_Key);
-                InsertIntoDataBase();*/
-                //Show_Content(answer);
                 UpdateDataBase();
             }
         }
@@ -291,42 +216,116 @@ namespace Weather_Info
 
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            queryString = "DROP TABLE [dbo].[Weather];";
-            functional.CreateCommand(queryString, connectionString);
+            if (isExist)
+            {
+                queryString = "DROP TABLE [dbo].[Weather];";
+                functional.CreateCommand(queryString, connectionString);
+                dataGridView1.Enabled = false;
+                isExist = false;
+                MessageBox.Show("Table succesfully eliminated!", "Congrats!");
+            }
+            else
+            {
+                MessageBox.Show("Create \"Weather\" table because curently it doesn't exist!", "Warning");
+            }
+            
         }
 
         private void создатьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            queryString = "CREATE TABLE [dbo].[Weather] (" +
+            dataGridView1.Enabled = true;
+            if (!isExist)
+            {
+                queryString = "CREATE TABLE [dbo].[Weather] (" +
                                                            "[Id] BIGINT IDENTITY(1, 1) NOT NULL PRIMARY KEY," +
                                                            "[City_Name] nvarchar(50) NOT NULL," +
                                                            "[Main] nvarchar(50) NOT NULL," +
                                                            "[Descript] nvarchar(50) NOT NULL," +
-                                                           "[Degrees] DECIMAL(18, 2) NOT NULL," +
-                                                           "[WindSpeed] DECIMAL(18, 2) NOT NULL," +
+                                                           "[Degrees] INT NOT NULL," +
+                                                           "[WindSpeed] INT NOT NULL," +
                                                            "[Direction] nvarchar(50) NOT NULL," +
-                                                           "[Humidity]  DECIMAL(18, 2) NOT NULL," +
+                                                           "[Humidity]  INT NOT NULL," +
                                                            "[Pressure] int NOT NULL," +
                                                            "[Icon] nvarchar(50) NOT NULL);";
-            functional.CreateCommand(queryString, connectionString);
-            InsertIntoDataBase();
-        }
-
-        private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            WeatherTable weatherTable = new WeatherTable();
-            weatherTable.ShowDialog();
+                functional.CreateCommand(queryString, connectionString);
+                InsertIntoDataBase();
+                isExist = true;
+                MessageBox.Show("Table succesfully created!", "Congrats!");
+            }
+            else
+            {
+                MessageBox.Show("Table \"Weather\" already exists!", "Warning");
+            }
+            
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
+        {           
             queryString = "DROP TABLE [dbo].[Weather];";
             functional.CreateCommand(queryString, connectionString);
         }
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            city = listBox_Cities.SelectedItem.ToString();
+            string path = Directory.GetCurrentDirectory() + "/icons/";
+            string iconName = "";
+            SqlConnection connection = new SqlConnection(connectionString);
+            SqlCommand command = new SqlCommand();
+            command.CommandText = "SELECT * FROM [dbo].[Weather] WHERE [City_Name] = '" + city + "';";
+            command.Connection = connection;
+            SqlDataReader reader;
+            try
+            {
+                command.Connection.Open();
+                reader = command.ExecuteReader();
+                while (reader.Read())
+                {
 
+                    label_Name.Text = reader["City_Name"].ToString().ToUpper();
+                    label_main.Text = reader["Main"].ToString().ToUpper();
+                    label_Description.Text = reader["Descript"].ToString().ToUpper();
+                    label_Degrees.Text = reader["Degrees"].ToString() + "°С";
+                    label_WindSpeed.Text = "Wind speed (m/s): " + reader["WindSpeed"].ToString();
+                    label_Direction.Text = "Wind direction: " + reader["Direction"].ToString();
+                    label_Humidity.Text = "Humidity (%): " + reader["Humidity"].ToString();
+                    label_Pressure.Text = "Pressure (mm): " + reader["Pressure"].ToString();
+                    iconName = reader["Icon"].ToString();
+                    panel_ImageStatus.BackgroundImage = new Bitmap(Image.FromFile($"{path}{iconName}.png"));
+                }
+                reader.Close();
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show("Error: \r\n{0}", ex.ToString());
+            }
+            finally
+            {
+                command.Connection.Close();
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            foreach (string cities in listBox_Cities.Items)
+            {
+                answer = functional.Get_Weather_Api(cities, api_Key);
+                OpenWeatherInfo openWeatherInfo = JsonConvert.DeserializeObject<OpenWeatherInfo>(answer);
+                direction = functional.Direction(openWeatherInfo.wind.deg, out direct);
+                queryString = "UPDATE[dbo].[Weather] SET " +
+                    "City_Name = '" + cities + "', " +
+                    "Main = '" + openWeatherInfo.weather[0].main + "', " +
+                    "Descript = '" + openWeatherInfo.weather[0].description + "', " +
+                    "Degrees = " + ((int)openWeatherInfo.main.temp).ToString("0.##") + ", " +
+                    "WindSpeed = " + ((int)openWeatherInfo.wind.speed).ToString() + ", " +
+                    "Direction = '" + direct + "', " +
+                    "Humidity = " + openWeatherInfo.main.humidity.ToString() + ", " +
+                    "Pressure = " + ((int)openWeatherInfo.main.pressure).ToString() + ", " +
+                    "Icon = '" + openWeatherInfo.weather[0].icon + "' " +
+                    "WHERE City_Name = ' " + cities + " ';";
+                functional.CreateCommand(queryString, connectionString);
+                functional.SelectDataBase(connectionString, dataGridView1);
+            }
         }
     }
 }
